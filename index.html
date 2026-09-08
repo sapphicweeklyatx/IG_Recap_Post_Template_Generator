@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sapphic Weekly ATX — Recap Caption Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#151019;--card:#211a28;--ink:#f0e6ef;--muted:#a394a8;
+    --primary:#e0579b;--primary-deep:#c53f80;--violet:#a98cd0;
+    --line:#372a40;--output-bg:#1b1421;--ok:#4fbf93;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:var(--page);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;color-scheme:dark;}
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 20px 64px;}
+
+  header.masthead{background:linear-gradient(120deg,#3a2140 0%,#5a2a5e 55%,#8e2b6b 100%);
+    color:#fff;border-radius:18px;padding:26px 28px;margin-bottom:24px;box-shadow:0 10px 30px rgba(58,33,64,.22);}
+  header.masthead h1{font-family:'Fraunces',Georgia,serif;font-weight:600;
+    font-size:clamp(1.6rem,3.4vw,2.35rem);line-height:1.05;margin:0 0 6px;letter-spacing:-.01em;}
+  header.masthead p{margin:0;color:#f0d9ec;font-size:.95rem;max-width:62ch;}
+
+  .grid{display:grid;grid-template-columns:minmax(0,0.95fr) minmax(0,1.05fr);gap:20px;align-items:start;}
+  @media (max-width:820px){.grid{grid-template-columns:1fr;}}
+  .rightcol{position:sticky;top:20px;}
+  @media (max-width:820px){.rightcol{position:static;}}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;}
+  .panel h2{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:1.15rem;margin:0 0 4px;}
+  .panel .sub{color:var(--muted);font-size:.85rem;margin:0 0 18px;}
+
+  .subhead{font-weight:600;font-size:.78rem;letter-spacing:.02em;color:var(--primary-deep);
+    margin:22px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--line);}
+  .subhead:first-of-type{margin-top:6px;}
+
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-weight:600;font-size:.9rem;margin-bottom:6px;}
+  .field .hint{color:var(--muted);font-weight:400;font-size:.8rem;margin-top:4px;}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media (max-width:480px){.row{grid-template-columns:1fr;}}
+
+  input[type=text],input[type=date],select{width:100%;font:inherit;color:var(--ink);
+    background:#1a1422;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;transition:border-color .15s ease;}
+  select{appearance:none;-webkit-appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%23e0579b' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat:no-repeat;background-position:right 12px center;padding-right:34px;cursor:pointer;}
+  input:focus,select:focus{outline:none;border-color:var(--primary);}
+  input:focus-visible,select:focus-visible{outline:2px solid var(--violet);outline-offset:1px;}
+
+  .toggle{display:flex;gap:8px;margin-top:2px;}
+  .toggle button{flex:1;font:inherit;font-weight:600;font-size:.9rem;cursor:pointer;
+    padding:10px;border-radius:10px;border:1.5px solid var(--line);background:#1a1422;color:var(--muted);transition:all .15s ease;}
+  .toggle button[aria-pressed="true"]{background:var(--primary);border-color:var(--primary);color:#fff;}
+  .toggle button:focus-visible{outline:2px solid var(--violet);outline-offset:2px;}
+  .conditional{background:#1d1526;border:1px solid var(--line);border-radius:10px;padding:14px 14px 2px;margin-top:-4px;margin-bottom:16px;}
+
+  .outhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px;}
+  .copybtn{font:inherit;font-weight:600;font-size:.85rem;cursor:pointer;background:var(--primary);color:#fff;
+    border:none;border-radius:9px;padding:9px 16px;transition:background .15s ease;white-space:nowrap;}
+  .copybtn:hover{background:var(--primary-deep);}
+  .copybtn:focus-visible{outline:2px solid var(--violet);outline-offset:2px;}
+  .copybtn.copied{background:var(--ok);}
+
+  #output{background:var(--output-bg);border:1px solid var(--line);border-radius:12px;padding:18px;
+    white-space:pre-wrap;word-wrap:break-word;font-size:.92rem;line-height:1.6;min-height:340px;}
+  .flag{color:var(--primary-deep);font-weight:600;}
+  footer.tinyfoot{text-align:center;color:var(--muted);font-size:.78rem;margin-top:28px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <h1>Recap Caption Generator</h1>
+    <p>This generates a general outline of a recap post and also promotes the upcoming one. Tweak as needed!!</p>
+  </header>
+
+  <div class="grid">
+
+    <!-- FORM -->
+    <section class="panel" aria-label="Recap details">
+
+      <div class="subhead">Past event — the photos in this post</div>
+
+      <div class="field">
+        <label for="pastVenue">Name of the venue in the photos</label>
+        <input type="text" id="pastVenue" placeholder="e.g. Marlow" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="pastHandle">That venue’s Instagram handle</label>
+        <input type="text" id="pastHandle" placeholder="e.g. @marlow.bar" autocomplete="off">
+        <div class="hint">Include the @.</div>
+      </div>
+
+      <div class="field">
+        <label id="pastPhotoLabel">Were these photos taken by a photographer?</label>
+        <div class="toggle" role="group" aria-labelledby="pastPhotoLabel">
+          <button type="button" id="pastPhotoYes" aria-pressed="false">Yes</button>
+          <button type="button" id="pastPhotoNo" aria-pressed="true">No</button>
+        </div>
+      </div>
+      <div class="conditional" id="pastHandleField" style="display:none;">
+        <div class="field">
+          <label for="pastPhotoHandle">Photographer’s handle</label>
+          <input type="text" id="pastPhotoHandle" placeholder="e.g. @jerickajohnsonphoto" autocomplete="off">
+          <div class="hint">Becomes the “📸 Photo Credit:” line.</div>
+        </div>
+      </div>
+
+      <div class="subhead">Upcoming event - the next event we're promoting</div>
+
+      <div class="field">
+        <label for="upVenue">Upcoming venue name</label>
+        <input type="text" id="upVenue" placeholder="e.g. Barfly's" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="upAddress">Upcoming venue address</label>
+        <input type="text" id="upAddress" placeholder="e.g. 5420-B Airport Blvd" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="upEvent">Upcoming event listing name</label>
+        <input type="text" id="upEvent" placeholder="e.g. Sapphic Pool Night at Barfly's" autocomplete="off">
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="day">Day of the week</label>
+          <select id="day">
+            <option value="" selected>Select a day</option>
+            <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+            <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="date">Date</label>
+          <input type="date" id="date">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="time">Start time</label>
+        <select id="time"><option value="" selected>Select a time</option></select>
+        <div class="hint">30-minute intervals.</div>
+      </div>
+
+      <div class="field">
+        <label id="gamesLabel">Will there be games?</label>
+        <div class="toggle" role="group" aria-labelledby="gamesLabel">
+          <button type="button" id="gamesYes" aria-pressed="false">Yes</button>
+          <button type="button" id="gamesNo" aria-pressed="true">No</button>
+        </div>
+      </div>
+      <div class="conditional" id="poolField" style="display:none;">
+        <div class="field" style="margin-bottom:6px;">
+          <label id="poolLabel">Will there be pool?</label>
+          <div class="toggle" role="group" aria-labelledby="poolLabel">
+            <button type="button" id="poolYes" aria-pressed="false">Yes</button>
+            <button type="button" id="poolNo" aria-pressed="true">No</button>
+          </div>
+          <div class="hint">Pool “Yes” keeps the 🎱 lines and “play some pool.”</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label id="upPhotoLabel">Will there be a photographer at the upcoming event?</label>
+        <div class="toggle" role="group" aria-labelledby="upPhotoLabel">
+          <button type="button" id="upPhotoYes" aria-pressed="false">Yes</button>
+          <button type="button" id="upPhotoNo" aria-pressed="true">No</button>
+        </div>
+      </div>
+      <div class="conditional" id="upHandleField" style="display:none;">
+        <div class="field">
+          <label for="upPhotoHandle">Photographer’s handle</label>
+          <input type="text" id="upPhotoHandle" placeholder="e.g. @jerickajohnsonphoto" autocomplete="off">
+          <div class="hint">Becomes the “📸 Professional Photography provided by…” line.</div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- OUTPUT -->
+    <div class="rightcol">
+      <section class="panel" aria-label="Generated caption">
+        <div class="outhead">
+          <h2>Live preview</h2>
+          <button type="button" class="copybtn" id="copyBtn">Copy caption</button>
+        </div>
+        <div id="output" aria-live="polite"></div>
+      </section>
+    </div>
+
+  </div>
+
+  <footer class="tinyfoot">Sapphic Weekly ATX · internal tool</footer>
+</div>
+
+<script>
+  var $ = function(id){ return document.getElementById(id); };
+  var pastVenueEl=$('pastVenue'), pastHandleEl=$('pastHandle'), pastPhotoHandleEl=$('pastPhotoHandle');
+  var upVenueEl=$('upVenue'), upAddressEl=$('upAddress'), upEventEl=$('upEvent');
+  var dayEl=$('day'), dateEl=$('date'), timeEl=$('time'), upPhotoHandleEl=$('upPhotoHandle');
+  var out=$('output'), copyBtn=$('copyBtn');
+
+  var hasPastPhoto=false, hasGames=false, hasPool=false, hasUpPhoto=false;
+
+  function press(yesBtn,noBtn,v){
+    yesBtn.setAttribute('aria-pressed', v?'true':'false');
+    noBtn.setAttribute('aria-pressed', v?'false':'true');
+  }
+  // Past photographer
+  $('pastPhotoYes').addEventListener('click',function(){hasPastPhoto=true;press($('pastPhotoYes'),$('pastPhotoNo'),true);$('pastHandleField').style.display='block';render();});
+  $('pastPhotoNo').addEventListener('click',function(){hasPastPhoto=false;press($('pastPhotoYes'),$('pastPhotoNo'),false);$('pastHandleField').style.display='none';render();});
+  // Games (+ reset pool when off)
+  $('gamesYes').addEventListener('click',function(){hasGames=true;press($('gamesYes'),$('gamesNo'),true);$('poolField').style.display='block';render();});
+  $('gamesNo').addEventListener('click',function(){hasGames=false;press($('gamesYes'),$('gamesNo'),false);$('poolField').style.display='none';hasPool=false;press($('poolYes'),$('poolNo'),false);render();});
+  // Pool
+  $('poolYes').addEventListener('click',function(){hasPool=true;press($('poolYes'),$('poolNo'),true);render();});
+  $('poolNo').addEventListener('click',function(){hasPool=false;press($('poolYes'),$('poolNo'),false);render();});
+  // Upcoming photographer
+  $('upPhotoYes').addEventListener('click',function(){hasUpPhoto=true;press($('upPhotoYes'),$('upPhotoNo'),true);$('upHandleField').style.display='block';render();});
+  $('upPhotoNo').addEventListener('click',function(){hasUpPhoto=false;press($('upPhotoYes'),$('upPhotoNo'),false);$('upHandleField').style.display='none';render();});
+
+  // Time options 12:00 PM – 11:30 PM, default 8:00 PM
+  (function(){
+    for(var h=12;h<=23;h++){for(var m=0;m<60;m+=30){
+      var suffix=h<12?'AM':'PM', hour12=h%12; if(hour12===0)hour12=12;
+      var label=hour12+':'+(m===0?'00':'30')+' '+suffix;
+      var opt=document.createElement('option'); opt.value=label; opt.textContent=label;
+      if(label==='8:00 PM')opt.selected=true; timeEl.appendChild(opt);
+    }}
+  })();
+
+  var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function formatDate(v){
+    if(!v)return '[DATE]';
+    var p=v.split('-'); var mo=parseInt(p[1],10)-1, d=parseInt(p[2],10);
+    if(isNaN(mo)||isNaN(d))return '[DATE]';
+    return MONTHS[mo]+' '+d;
+  }
+  function compactTime(v){ if(!v)return '[TIME]'; return v.replace(' ','').replace(':00',''); }
+
+  function build(){
+    var pastVenue=pastVenueEl.value.trim()||'[PAST VENUE NAME]';
+    var pastHandle=pastHandleEl.value.trim()||'[@PAST VENUE HANDLE]';
+    var upVenue=upVenueEl.value.trim()||'[UPCOMING VENUE]';
+    var upAddress=upAddressEl.value.trim()||'[UPCOMING ADDRESS]';
+    var upEvent=upEventEl.value.trim()||'[UPCOMING EVENT NAME]';
+    var day=dayEl.value||'[DAY]';
+    var dayUpper=dayEl.value?dayEl.value.toUpperCase():'[DAY]';
+    var upDate=formatDate(dateEl.value);
+    var upTime=compactTime(timeEl.value);
+    var showPool=hasGames&&hasPool;
+
+    var b=[];
+    b.push("Our Austin sapphics showed UP at "+pastHandle+" \u2728swipe for a glimpse of what a Sapphic Weekly ATX night looks like: drinks to good music, new faces becoming familiar ones, new friendships, a little flirting, and a whole lot of queer joy. \uD83C\uDFF3\uFE0F\u200D\uD83C\uDF08\u2728");
+
+    b.push("A huge thank you to "+pastHandle+" for always welcoming our community with open arms. \uD83D\uDC9C "+pastVenue+" easily became a crowd favorite - the kind of spot where you can show up knowing no one and leave with your phone blowing up with texts from your new group chat.");
+
+    if(hasPastPhoto){
+      b.push("\uD83D\uDCF8 Photo Credit: "+(pastPhotoHandleEl.value.trim()||'[PHOTOGRAPHER HANDLE]'));
+    }
+
+    b.push("Ready to be in the next photo dump?"+(showPool?" \uD83C\uDFB1":""));
+
+    b.push("We're doing it all over again this "+dayUpper+" at "+upEvent+". Come solo or bring your people - grab a drink, "+(showPool?"play some pool, ":"")+"meet someone new, and spend the night with Austin's sapphic community.");
+
+    b.push(
+      "\uD83D\uDCCD "+upVenue+" \u00B7 "+upAddress+"\n"+
+      "\uD83D\uDCC5 "+day+", "+upDate+" \u00B7 "+upTime+"\n"+
+      "\uD83C\uDF9F\uFE0F Free\n"+
+      "\uD83D\uDD17 RSVP link in Bio"
+    );
+
+    if(hasUpPhoto){
+      b.push("\uD83D\uDCF8 Professional Photography provided by "+(upPhotoHandleEl.value.trim()||'[PHOTOGRAPHER HANDLE]'));
+    }
+
+    b.push("Love seeing Austin's WLW community come together like this? Share this post to your story so we can all find eachother \uD83D\uDC9C");
+
+    b.push("\uD83C\uDFF3\uFE0F\u200D\uD83C\uDF08 New here? Find any table with a pride flag stand and meet other sapphics looking to make connections too\uD83D\uDC95");
+
+    if(showPool){
+      b.push("\uD83C\uDFB1 In the comments if we'll see you this week or tag someone who owes you a rematch \uD83D\uDE08");
+    }
+
+    b.push("#austinpride #sapphic #atx #lesbian #atxevents");
+
+    return b.join("\n\n");
+  }
+
+  function render(){
+    var text=build();
+    out.dataset.raw=text;
+    out.textContent=text;
+    out.innerHTML=out.innerHTML.replace(/\[[^\]]+\]/g,function(m){return '<span class="flag">'+m+'</span>';});
+  }
+
+  [pastVenueEl,pastHandleEl,pastPhotoHandleEl,upVenueEl,upAddressEl,upEventEl,upPhotoHandleEl].forEach(function(el){el.addEventListener('input',render);});
+  [dayEl,dateEl,timeEl].forEach(function(el){el.addEventListener('change',render);});
+
+  copyBtn.addEventListener('click',function(){
+    var text=out.dataset.raw||build();
+    navigator.clipboard.writeText(text).then(function(){
+      copyBtn.textContent='Copied \u2713'; copyBtn.classList.add('copied');
+      setTimeout(function(){copyBtn.textContent='Copy caption';copyBtn.classList.remove('copied');},1800);
+    }).catch(function(){
+      var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();
+      try{document.execCommand('copy');}catch(e){}document.body.removeChild(ta);
+      copyBtn.textContent='Copied \u2713';setTimeout(function(){copyBtn.textContent='Copy caption';},1800);
+    });
+  });
+
+  render();
+</script>
+</body>
+</html>
